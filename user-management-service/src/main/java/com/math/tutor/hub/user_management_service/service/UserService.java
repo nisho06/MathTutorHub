@@ -1,16 +1,42 @@
 package com.math.tutor.hub.user_management_service.service;
 
-import org.apache.catalina.User;
+import com.math.tutor.hub.user_management_service.model.User;
+import com.math.tutor.hub.user_management_service.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.NoSuchElementException;
+import java.util.Optional;
 
 @Service
 public class UserService {
+
+    private UserRepository userRepository;
 
     public UserService(){
 
     }
 
-    public String getUser(){
-        return "This is sample user.";
+    @Autowired
+    public UserService(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+
+    public User getUserByUserId(int userId){
+        Optional<User> user =  userRepository.findUserByUserId(userId);
+
+        if (user.isEmpty()){
+            throw new NoSuchElementException();
+        }
+        return user.get();
+    }
+
+    public User getUserByEmail(String email){
+        Optional<User> user = userRepository.findUserByEmail(email);
+
+        if (user.isEmpty()){
+            throw new NoSuchElementException();
+        }
+        return user.get();
     }
 }
