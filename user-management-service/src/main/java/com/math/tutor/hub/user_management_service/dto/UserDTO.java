@@ -1,18 +1,9 @@
-package com.math.tutor.hub.user_management_service.model;
+package com.math.tutor.hub.user_management_service.dto;
 
-import jakarta.persistence.*;
-import lombok.NoArgsConstructor;
-
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
-
-@Entity
-@Table(name = "user")
-@NoArgsConstructor
-public class User {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    // IDENTITY Generation type is used when the database table  itself handles the auto increment of the primary key.
+public class UserDTO {
     private int userId;
     private String email;
     private String firstName;
@@ -21,30 +12,10 @@ public class User {
     private String address;
     private String postcode;
     private String role;
-    private String password;
-    private String salt;
     private String subscriptionTier;
     private LocalDateTime userCreatedAt;
     private LocalDateTime passwordLastChanged;
     private LocalDateTime lastLoginAt;
-
-    public User(String email, String firstName, String surname, String phoneNo, String address, String postcode,
-                String role, String password, String salt, String subscriptionTier,
-                LocalDateTime userCreatedAt, LocalDateTime passwordLastChanged, LocalDateTime lastLoginAt) {
-        this.email = email;
-        this.firstName = firstName;
-        this.surname = surname;
-        this.phoneNo = phoneNo;
-        this.address = address;
-        this.postcode = postcode;
-        this.role = role;
-        this.password = password;
-        this.salt = salt;
-        this.subscriptionTier = subscriptionTier;
-        this.userCreatedAt = userCreatedAt;
-        this.passwordLastChanged = passwordLastChanged;
-        this.lastLoginAt = lastLoginAt;
-    }
 
     public int getUserId() {
         return userId;
@@ -108,22 +79,6 @@ public class User {
 
     public void setRole(String role) {
         this.role = role;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public String getSalt() {
-        return salt;
-    }
-
-    public void setSalt(String salt) {
-        this.salt = salt;
     }
 
     public String getSubscriptionTier() {
