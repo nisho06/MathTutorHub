@@ -1,5 +1,6 @@
 package com.math.tutor.hub.user_management_service.service;
 
+import com.math.tutor.hub.user_management_service.exception.UserNotFoundException;
 import com.math.tutor.hub.user_management_service.model.User;
 import com.math.tutor.hub.user_management_service.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +15,6 @@ public class UserService {
     private UserRepository userRepository;
 
     public UserService(){
-
     }
 
     @Autowired
@@ -26,7 +26,7 @@ public class UserService {
         Optional<User> user =  userRepository.findUserByUserId(userId);
 
         if (user.isEmpty()){
-            throw new NoSuchElementException();
+            throw new UserNotFoundException("User not found for the user id:- " + userId);
         }
         return user.get();
     }
@@ -35,7 +35,7 @@ public class UserService {
         Optional<User> user = userRepository.findUserByEmail(email);
 
         if (user.isEmpty()){
-            throw new NoSuchElementException();
+            throw new UserNotFoundException("User not found for the email:- " + email);
         }
         return user.get();
     }

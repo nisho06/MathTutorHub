@@ -2,7 +2,6 @@ package com.math.tutor.hub.user_management_service.error;
 
 import org.springframework.http.HttpStatus;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
