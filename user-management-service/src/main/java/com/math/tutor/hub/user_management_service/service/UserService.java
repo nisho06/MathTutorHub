@@ -1,10 +1,18 @@
 package com.math.tutor.hub.user_management_service.service;
 
-import com.math.tutor.hub.user_management_service.dto.UserDTO;
+import com.math.tutor.hub.user_management_service.dto.UserResponseDTO;
+import com.math.tutor.hub.user_management_service.enums.Role;
+import com.math.tutor.hub.user_management_service.enums.SubscriptionTier;
+import com.math.tutor.hub.user_management_service.exception.ForbiddenAccessException;
+import com.math.tutor.hub.user_management_service.exception.UnauthorizedAccessException;
 import com.math.tutor.hub.user_management_service.exception.UserNotFoundException;
 import com.math.tutor.hub.user_management_service.model.User;
 import com.math.tutor.hub.user_management_service.repository.UserRepository;
+import com.math.tutor.hub.user_management_service.security.CustomUserDetails;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -12,6 +20,8 @@ import java.util.List;
 
 @Service
 public class UserService {
+
+    private static final SubscriptionTier DEFAULT_SUBSCRIPTION_TIER = SubscriptionTier.FREE;
 
     private UserRepository userRepository;
 
@@ -23,44 +33,48 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public UserDTO getUserByUserId(int userId){
+    public UserResponseDTO getUserByUserId(int userId){
 
         User user = userRepository.findUserByUserId(userId)
                 .orElseThrow(() -> new UserNotFoundException("User not found for the user id:- " + userId));
-        return convertToDto(user);
+        authenticateRequest(user.getEmail());
+        return UserMapper.convertToUserResponseDto(user);
     }
 
-    public UserDTO getUserByEmail(String email){
+    public UserResponseDTO getUserByEmail(String email){
+
+        authenticateRequest(email);
 
         User user = userRepository.findUserByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException("User not found for the email:- " + email));
-        return convertToDto(user);
+        return UserMapper.convertToUserResponseDto(user);
     }
 
-    public List<UserDTO> getAllUsers(){
+    public List<UserResponseDTO> getAllUsers(){
+
+        authenticateRequest(null);
+
         List<User> userList =  userRepository.findAll();
-        List<UserDTO> userDTOList = new ArrayList<>();
+        List<UserResponseDTO> userResponseDTOList = new ArrayList<>();
         for (User user: userList){
-            userDTOList.add(convertToDto(user));
+            userResponseDTOList.add(UserMapper.convertToUserResponseDto(user));
         }
-        return userDTOList;
+        return userResponseDTOList;
     }
 
-    public UserDTO convertToDto(User user){
+    private void authenticateRequest(String email){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        UserDTO userDTO = new UserDTO();
-        userDTO.setUserId(user.getUserId());
-        userDTO.setEmail(user.getEmail());
-        userDTO.setFirstName(user.getFirstName());
-        userDTO.setSurname(user.getSurname());
-        userDTO.setPhoneNo(user.getPhoneNo());
-        userDTO.setAddress(user.getAddress());
-        userDTO.setPostcode(user.getPostcode());
-        userDTO.setRole(user.getRole());
-        userDTO.setSubscriptionTier(user.getSubscriptionTier());
-        userDTO.setUserCreatedAt(user.getUserCreatedAt());
-        userDTO.setPasswordLastChanged(user.getPasswordLastChanged());
-        userDTO.setLastLoginAt(user.getLastLoginAt());
-        return userDTO;
+        if (authentication == null || !(authentication.getPrincipal() instanceof UserDetails)) {
+            throw new UnauthorizedAccessException("Unauthorized access.");
+        }
+
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        String authenticatedEmail = userDetails.getUsername();
+
+        User authenticatedUser = userDetails.getUser();
+        if ((!authenticatedEmail.equals(email)) && !(authenticatedUser.getRole().equals(Role.ADMIN))){
+            throw new ForbiddenAccessException("Access Denied - You are not authorized to access this resource.");
+        }
     }
 }

@@ -1,6 +1,6 @@
 package com.math.tutor.hub.user_management_service.controller;
 
-import com.math.tutor.hub.user_management_service.dto.UserDTO;
+import com.math.tutor.hub.user_management_service.dto.UserResponseDTO;
 import com.math.tutor.hub.user_management_service.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,21 +22,19 @@ public class UserController {
 
     @GetMapping
     public ResponseEntity<?> getAllUsers(){
-        List<UserDTO> userDTOList = userService.getAllUsers();
-        return new ResponseEntity<>(userDTOList, HttpStatus.OK);
+        List<UserResponseDTO> userResponseDTOList = userService.getAllUsers();
+        return new ResponseEntity<>(userResponseDTOList, HttpStatus.OK);
     }
 
     @GetMapping(path = {"id/{userId}"})
     public ResponseEntity<?> getUserByUserId(@PathVariable int userId){
-
-        UserDTO userDTO = userService.getUserByUserId(userId);
-        return new ResponseEntity<>(userDTO, HttpStatus.OK);
+        UserResponseDTO userResponseDTO = userService.getUserByUserId(userId);
+        return new ResponseEntity<>(userResponseDTO, HttpStatus.OK);
     }
 
     @GetMapping(path = {"email/{email}"})
     public ResponseEntity<?> getUserByEmail(@PathVariable String email){
-
-        UserDTO userDTO = userService.getUserByEmail(email);
-        return new ResponseEntity<>(userDTO, HttpStatus.OK);
+        UserResponseDTO userResponseDTO = userService.getUserByEmail(email);
+        return new ResponseEntity<>(userResponseDTO, HttpStatus.OK);
     }
 }

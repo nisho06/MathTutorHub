@@ -1,9 +1,12 @@
 package com.math.tutor.hub.user_management_service.dto;
 
+import com.math.tutor.hub.user_management_service.enums.Role;
+import com.math.tutor.hub.user_management_service.enums.SubscriptionTier;
+
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
-public class UserDTO {
+public class UserResponseDTO {
     private int userId;
     private String email;
     private String firstName;
@@ -11,8 +14,8 @@ public class UserDTO {
     private String phoneNo;
     private String address;
     private String postcode;
-    private String role;
-    private String subscriptionTier;
+    private Role role;
+    private SubscriptionTier subscriptionTier;
     private LocalDateTime userCreatedAt;
     private LocalDateTime passwordLastChanged;
     private LocalDateTime lastLoginAt;
@@ -73,19 +76,19 @@ public class UserDTO {
         this.postcode = postcode;
     }
 
-    public String getRole() {
+    public Role getRole() {
         return role;
     }
 
-    public void setRole(String role) {
+    public void setRole(Role role) {
         this.role = role;
     }
 
-    public String getSubscriptionTier() {
+    public SubscriptionTier getSubscriptionTier() {
         return subscriptionTier;
     }
 
-    public void setSubscriptionTier(String subscriptionTier) {
+    public void setSubscriptionTier(SubscriptionTier subscriptionTier) {
         this.subscriptionTier = subscriptionTier;
     }
 
