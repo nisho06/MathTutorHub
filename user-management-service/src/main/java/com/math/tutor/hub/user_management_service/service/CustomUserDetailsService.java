@@ -1,5 +1,6 @@
 package com.math.tutor.hub.user_management_service.service;
 
+import com.math.tutor.hub.user_management_service.exception.UserNotFoundException;
 import com.math.tutor.hub.user_management_service.model.User;
 import com.math.tutor.hub.user_management_service.repository.UserRepository;
 import com.math.tutor.hub.user_management_service.security.CustomUserDetails;
@@ -16,9 +17,9 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     private UserRepository userRepository;
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepository.findUserByEmail(username).orElseThrow(
-                ()-> new UsernameNotFoundException("User not found"));
+    public UserDetails loadUserByUsername(String email) throws UserNotFoundException {
+        User user = userRepository.findUserByEmail(email).orElseThrow(
+                ()-> new UserNotFoundException("User not found for the email:- " + email));
         return new CustomUserDetails(user);
     }
 }

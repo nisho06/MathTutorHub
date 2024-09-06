@@ -1,5 +1,6 @@
 package com.math.tutor.hub.user_management_service.controller;
 
+import com.math.tutor.hub.user_management_service.dto.UserRequestDTO;
 import com.math.tutor.hub.user_management_service.dto.UserResponseDTO;
 import com.math.tutor.hub.user_management_service.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,4 +38,17 @@ public class UserController {
         UserResponseDTO userResponseDTO = userService.getUserByEmail(email);
         return new ResponseEntity<>(userResponseDTO, HttpStatus.OK);
     }
+
+    @PutMapping(path = {"email/{email}"})
+    public ResponseEntity<?> updateUserByEmail(@PathVariable String email, @RequestBody UserRequestDTO userRequestDTO){
+        UserResponseDTO userResponseDTO = userService.updateUserByUserId(email, userRequestDTO);
+        return new ResponseEntity<>(userResponseDTO, HttpStatus.OK);
+    }
+
+    @DeleteMapping(path = {"email/{email}"})
+    public ResponseEntity<?> deleteUserByEmail(@PathVariable String email){
+        userService.deleteUserByEmail(email);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
 }
