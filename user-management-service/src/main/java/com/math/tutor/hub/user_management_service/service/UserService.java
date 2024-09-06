@@ -61,11 +61,7 @@ public class UserService {
         authenticateRequest(null);
 
         List<User> userList =  userRepository.findAll();
-        List<UserResponseDTO> userResponseDTOList = new ArrayList<>();
-        for (User user: userList){
-            userResponseDTOList.add(UserMapper.convertToUserResponseDto(user));
-        }
-        return userResponseDTOList;
+         return convertUserToUserResponseDTOList(userList);
     }
 
     public UserResponseDTO updateUserByUserId(String email, UserRequestDTO userRequestDTO) {
@@ -128,6 +124,19 @@ public class UserService {
         }
     }
 
+    public List<UserResponseDTO> filterUsersByParameter(String email, String firstName, String surname, String postcode,
+                                                        String phoneNo, Role role, SubscriptionTier subscriptionTier) {
+        if (email == null && firstName == null && surname == null
+                && postcode == null && phoneNo == null && role == null && subscriptionTier == null){
+            return getAllUsers();
+        } else {
+            authenticateRequest(null);
+            List<User> filteredUserList = userRepository.filterUsers(email, firstName, surname, postcode, phoneNo,
+                    role, subscriptionTier);
+            return convertUserToUserResponseDTOList(filteredUserList);
+        }
+    }
+
     private void authenticateRequest(String email){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
@@ -142,5 +151,13 @@ public class UserService {
         if ((!authenticatedEmail.equals(email)) && !(authenticatedUser.getRole().equals(Role.ADMIN))){
             throw new ForbiddenAccessException("Access Denied - You are not authorized to access this resource.");
         }
+    }
+
+    private List<UserResponseDTO> convertUserToUserResponseDTOList(List<User> userList){
+        List<UserResponseDTO> userResponseDTOList = new ArrayList<>();
+        for (User user: userList){
+            userResponseDTOList.add(UserMapper.convertToUserResponseDto(user));
+        }
+        return userResponseDTOList;
     }
 }

@@ -2,6 +2,8 @@ package com.math.tutor.hub.user_management_service.controller;
 
 import com.math.tutor.hub.user_management_service.dto.UserRequestDTO;
 import com.math.tutor.hub.user_management_service.dto.UserResponseDTO;
+import com.math.tutor.hub.user_management_service.enums.Role;
+import com.math.tutor.hub.user_management_service.enums.SubscriptionTier;
 import com.math.tutor.hub.user_management_service.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -51,4 +53,17 @@ public class UserController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @GetMapping(path = "/filter")
+    public ResponseEntity<?> filterUsersByParameter(
+            @RequestParam(required = false) String email,
+            @RequestParam(required = false) String firstName,
+            @RequestParam(required = false) String surname,
+            @RequestParam(required = false) String postcode,
+            @RequestParam(required = false) String phoneNo,
+            @RequestParam(required = false) Role role,
+            @RequestParam(required = false)SubscriptionTier subscriptionTier){
+        List<UserResponseDTO> filteredUserResponse = userService.filterUsersByParameter(email, firstName, surname,
+                postcode, phoneNo, role, subscriptionTier);
+        return new ResponseEntity<>(filteredUserResponse, HttpStatus.OK);
+    }
 }
