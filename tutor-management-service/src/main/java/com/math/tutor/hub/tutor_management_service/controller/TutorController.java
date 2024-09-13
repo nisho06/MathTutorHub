@@ -1,5 +1,6 @@
 package com.math.tutor.hub.tutor_management_service.controller;
 
+import com.math.tutor.hub.tutor_management_service.dto.TutorDTO;
 import com.math.tutor.hub.tutor_management_service.model.Tutor;
 import com.math.tutor.hub.tutor_management_service.service.TutorService;
 import lombok.RequiredArgsConstructor;
@@ -23,32 +24,32 @@ public class TutorController {
 
     @GetMapping
     public ResponseEntity<?> getAllTutors(){
-        List<Tutor> tutorList = tutorService.getAllTutors();
+        List<TutorDTO> tutorList = tutorService.getAllTutors();
         return new ResponseEntity<>(tutorList, HttpStatus.OK);
     }
 
     @GetMapping(path = "/email/{email}")
     public ResponseEntity<?> getTutorByEmail(@PathVariable String email){
-        Tutor tutor = tutorService.getTutorByEmail(email);
-        return new ResponseEntity<>(tutor, HttpStatus.OK);
+        TutorDTO tutorDTO = tutorService.getTutorByEmail(email);
+        return new ResponseEntity<>(tutorDTO, HttpStatus.OK);
     }
 
     @GetMapping(path = "/id/{tutorId}")
     public ResponseEntity<?> getTutorByTutorId(@PathVariable int tutorId){
-        Tutor tutor = tutorService.getTutorByTutorId(tutorId);
-        return new ResponseEntity<>(tutor, HttpStatus.OK);
+        TutorDTO tutorDTO = tutorService.getTutorByTutorId(tutorId);
+        return new ResponseEntity<>(tutorDTO, HttpStatus.OK);
     }
 
     @PostMapping
-    public ResponseEntity<?> registerTutor(@RequestBody Tutor tutor){
-        Tutor createdTutor = tutorService.registerTutor(tutor);
+    public ResponseEntity<?> registerTutor(@RequestBody TutorDTO tutorDTO){
+        TutorDTO createdTutor = tutorService.registerTutor(tutorDTO);
         return new ResponseEntity<>(createdTutor, HttpStatus.CREATED);
     }
 
     @PutMapping(path = "/email/{email}")
-    public ResponseEntity<?> updateTutor(@PathVariable String email, @RequestBody Tutor tutor){
-        Tutor updatedTutor = tutorService.updateTutor(email, tutor);
-        return new ResponseEntity<>(updatedTutor, HttpStatus.OK);
+    public ResponseEntity<?> updateTutor(@PathVariable String email, @RequestBody TutorDTO tutorDTO){
+        TutorDTO updatedTutorDTO = tutorService.updateTutor(email, tutorDTO);
+        return new ResponseEntity<>(updatedTutorDTO, HttpStatus.OK);
     }
 
     @DeleteMapping(path = "/email/{email}")
@@ -64,9 +65,11 @@ public class TutorController {
             @RequestParam(required = false) String postcode,
             @RequestParam(required = false) String phoneNumber,
             @RequestParam(required = false) Boolean isQualified,
-            @RequestParam(required = false) Boolean isActive
+            @RequestParam(required = false) Boolean isActive,
+            @RequestParam(required = false) Integer tutorYear
             ){
-        List<Tutor> filteredTutorList = tutorService.filterTutor(firstName, surname, postcode, phoneNumber, isQualified, isActive);
-        return new ResponseEntity<>(filteredTutorList, HttpStatus.OK);
+        List<TutorDTO> filteredTutorDTOList = tutorService.filterTutor(firstName, surname, postcode, phoneNumber,
+                isQualified, isActive, tutorYear);
+        return new ResponseEntity<>(filteredTutorDTOList, HttpStatus.OK);
     }
 }

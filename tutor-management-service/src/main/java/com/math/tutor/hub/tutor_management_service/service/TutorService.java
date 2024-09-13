@@ -1,16 +1,20 @@
 package com.math.tutor.hub.tutor_management_service.service;
 
+import com.math.tutor.hub.tutor_management_service.dto.TutorDTO;
+import com.math.tutor.hub.tutor_management_service.dto.TutorYearsDTO;
 import com.math.tutor.hub.tutor_management_service.exceptions.TutorAlreadyExistException;
 import com.math.tutor.hub.tutor_management_service.exceptions.TutorNotFoundException;
 import com.math.tutor.hub.tutor_management_service.model.Tutor;
+import com.math.tutor.hub.tutor_management_service.model.TutorYears;
+import com.math.tutor.hub.tutor_management_service.model.TutorYearsPK;
 import com.math.tutor.hub.tutor_management_service.repository.TutorRepository;
+import com.math.tutor.hub.tutor_management_service.repository.TutorYearsRepository;
 import lombok.AllArgsConstructor;
-import org.springframework.cglib.core.Local;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @AllArgsConstructor
 @Service
@@ -18,46 +22,64 @@ public class TutorService {
 
     private TutorRepository tutorRepository;
 
-    public List<Tutor> getAllTutors() {
-        return tutorRepository.findAll();
+    private TutorYearsRepository tutorYearsRepository;
+
+    public List<TutorDTO> getAllTutors() {
+        return TutorMapper.convertToTutorDTOList(tutorRepository.findAll());
     }
 
-    public Tutor getTutorByEmail(String email) {
-        return tutorRepository.findTutorByEmail(email)
-                .orElseThrow(() -> new TutorNotFoundException("Tutor not found for the email:- " + email));
+    public TutorDTO getTutorByEmail(String email) {
+        return TutorMapper.convertTutorToTutorDTO(tutorRepository.findTutorByEmail(email)
+                .orElseThrow(() -> new TutorNotFoundException("Tutor not found for the email:- " + email)));
     }
 
-    public Tutor getTutorByTutorId(int tutorId) {
-        return tutorRepository.findTutorByTutorId(tutorId)
-                .orElseThrow(()-> new TutorNotFoundException("Tutor not found for the tutor id:- " + tutorId));
+    public TutorDTO getTutorByTutorId(int tutorId) {
+        return TutorMapper.convertTutorToTutorDTO(tutorRepository.findTutorByTutorId(tutorId)
+                .orElseThrow(()-> new TutorNotFoundException("Tutor not found for the tutor id:- " + tutorId)));
     }
 
-    public Tutor registerTutor(Tutor tutor) {
-        boolean isTutorExist = tutorRepository.existsByEmail(tutor.getEmail());
+    @Transactional
+    public TutorDTO registerTutor(TutorDTO tutorDTO) {
+        boolean isTutorExist = tutorRepository.existsByEmail(tutorDTO.getEmail());
 
         if (isTutorExist){
-            throw new TutorAlreadyExistException("Tutor already exist for the email:- " + tutor.getEmail());
+            throw new TutorAlreadyExistException("Tutor already exist for the email:- " + tutorDTO.getEmail());
         }
 
+        Tutor tutor = TutorMapper.convertToTutor(tutorDTO);
         tutor.setUpdatedAt(LocalDateTime.now());
         tutor.setCreatedAt(LocalDateTime.now());
 
-        tutorRepository.save(tutor);
+        Tutor savedTutor = tutorRepository.save(tutor);
 
-        return tutor;
+        if (tutorDTO.getTutorYears() != null){
+            List<TutorYears> tutorYearsList = new ArrayList<>();
+            for (TutorYearsDTO tutorYearsDTO : tutorDTO.getTutorYears()){
+                TutorYears tutorYears = new TutorYears();
+                TutorYearsPK tutorYearsPK = new TutorYearsPK(savedTutor.getTutorId(), tutorYearsDTO.getTutorYear());
+                tutorYears.setTutorYearsPK(tutorYearsPK);
+                tutorYears.setTutor(savedTutor);
+                tutorYearsList.add(tutorYears);
+            }
+            tutorYearsRepository.saveAll(tutorYearsList);
+        }
+
+        return tutorDTO;
     }
 
-    public Tutor updateTutor(String email, Tutor tutor) {
+    @Transactional
+    public TutorDTO updateTutor(String email, TutorDTO tutorDTO) {
 
         Tutor existingTutor = tutorRepository.findTutorByEmail(email)
                 .orElseThrow(()-> new TutorNotFoundException("Tutor not found for the email:- " + email));
 
-        String firstName = tutor.getFirstName();
-        String surname = tutor.getSurname();
-        String phoneNumber = tutor.getPhoneNumber();
-        String postcode = tutor.getPostcode();
-        Boolean isQualified = tutor.getIsQualified();
-        Boolean isActive = tutor.getIsActive();
+        String firstName = tutorDTO.getFirstName();
+        String surname = tutorDTO.getSurname();
+        String phoneNumber = tutorDTO.getPhoneNumber();
+        String postcode = tutorDTO.getPostcode();
+        Boolean isQualified = tutorDTO.getIsQualified();
+        Boolean isActive = tutorDTO.getIsActive();
+        List<TutorYearsDTO> tutorYears = tutorDTO.getTutorYears();
 
         if (firstName != null && !Objects.equals(firstName, existingTutor.getFirstName())){
             existingTutor.setFirstName(firstName);
@@ -83,10 +105,22 @@ public class TutorService {
             existingTutor.setIsActive(isActive);
         }
 
+        if (tutorYears != null){
+            List<TutorYears> tutorYearsList = new ArrayList<>();
+            for (TutorYearsDTO tutorYearsDTO: tutorYears){
+                TutorYearsPK tutorYearsPK =
+                        new TutorYearsPK(existingTutor.getTutorId(), tutorYearsDTO.getTutorYear());
+                tutorYearsList.add(new TutorYears(tutorYearsPK, existingTutor));
+            }
+
+            tutorYearsRepository.saveAll(tutorYearsList);
+            existingTutor.setTutorYears(tutorYearsRepository.findTutorYearsByTutorId(existingTutor.getTutorId()));
+        }
+
         existingTutor.setUpdatedAt(LocalDateTime.now());
         tutorRepository.save(existingTutor);
 
-        return existingTutor;
+        return TutorMapper.convertTutorToTutorDTO(existingTutor);
     }
 
     public void deleteTutorByEmail(String email) {
@@ -97,14 +131,14 @@ public class TutorService {
         }
     }
 
-    public List<Tutor> filterTutor(String firstName, String surname, String postcode, String phoneNumber,
-                                   Boolean isQualified, Boolean isActive) {
+    public List<TutorDTO> filterTutor(String firstName, String surname, String postcode, String phoneNumber,
+                                   Boolean isQualified, Boolean isActive, Integer tutorYear) {
         if (firstName == null && surname == null && postcode == null && phoneNumber == null &&
-                isQualified == null && isActive == null){
+                isQualified == null && isActive == null && tutorYear == null){
             return getAllTutors();
         } else {
-            return tutorRepository.filterTutors(firstName, surname, postcode, phoneNumber,
-                    isQualified, isActive);
+            return TutorMapper.convertToTutorDTOList(tutorRepository.filterTutors(firstName, surname, postcode, phoneNumber,
+                    isQualified, isActive, tutorYear));
         }
     }
 }

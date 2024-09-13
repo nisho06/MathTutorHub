@@ -18,19 +18,22 @@ public interface TutorRepository extends JpaRepository<Tutor, Integer> {
     @Transactional
     void deleteByEmail(String email);
 
-    @Query("SELECT t FROM Tutor t WHERE " +
+    @Query("SELECT t FROM Tutor t LEFT JOIN TutorYears ty ON t.tutorId = ty.tutorYearsPK.tutorId WHERE " +
             "(:firstName is NULL OR t.firstName = :firstName) AND " +
             "(:surname is NULL OR t.surname = :surname) AND " +
             "(:postcode is NULL OR t.postcode = :postcode) AND " +
             "(:phoneNumber is NULL OR t.phoneNumber = :phoneNumber) AND " +
             "(:isQualified is NULL OR t.isQualified = :isQualified) AND " +
-            "(:isActive is NULL OR t.isActive = :isActive)")
+            "(:isActive is NULL OR t.isActive = :isActive) AND " +
+            "(:tutoringYear is NULL OR ty.tutorYearsPK.tutoringYear = :tutoringYear)"
+    )
     List<Tutor> filterTutors(
             @Param("firstName") String firstName,
             @Param("surname") String surname,
             @Param("postcode") String postcode,
             @Param("phoneNumber") String phoneNumber,
             @Param("isQualified") Boolean isQualified,
-            @Param("isActive") Boolean isActive
+            @Param("isActive") Boolean isActive,
+            @Param("tutoringYear") Integer tutoringYear
     );
 }
