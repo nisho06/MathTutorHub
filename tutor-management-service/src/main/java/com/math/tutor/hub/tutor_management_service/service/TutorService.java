@@ -1,14 +1,13 @@
 package com.math.tutor.hub.tutor_management_service.service;
 
 import com.math.tutor.hub.tutor_management_service.dto.TutorDTO;
-import com.math.tutor.hub.tutor_management_service.dto.TutorYearsDTO;
+import com.math.tutor.hub.tutor_management_service.enums.DayOfWeek;
 import com.math.tutor.hub.tutor_management_service.exceptions.TutorAlreadyExistException;
 import com.math.tutor.hub.tutor_management_service.exceptions.TutorNotFoundException;
-import com.math.tutor.hub.tutor_management_service.model.Tutor;
-import com.math.tutor.hub.tutor_management_service.model.TutorYears;
-import com.math.tutor.hub.tutor_management_service.model.TutorYearsPK;
+import com.math.tutor.hub.tutor_management_service.model.*;
 import com.math.tutor.hub.tutor_management_service.repository.TutorRepository;
 import com.math.tutor.hub.tutor_management_service.repository.TutorYearsRepository;
+import com.math.tutor.hub.tutor_management_service.repository.TutorsAvailabilityRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +22,8 @@ public class TutorService {
     private TutorRepository tutorRepository;
 
     private TutorYearsRepository tutorYearsRepository;
+
+    private TutorsAvailabilityRepository tutorsAvailabilityRepository;
 
     public List<TutorDTO> getAllTutors() {
         return TutorMapper.convertToTutorDTOList(tutorRepository.findAll());
@@ -54,14 +55,26 @@ public class TutorService {
 
         if (tutorDTO.getTutorYears() != null){
             List<TutorYears> tutorYearsList = new ArrayList<>();
-            for (TutorYearsDTO tutorYearsDTO : tutorDTO.getTutorYears()){
+            for (Integer year : tutorDTO.getTutorYears()){
                 TutorYears tutorYears = new TutorYears();
-                TutorYearsPK tutorYearsPK = new TutorYearsPK(savedTutor.getTutorId(), tutorYearsDTO.getTutorYear());
+                TutorYearsPK tutorYearsPK = new TutorYearsPK(savedTutor.getTutorId(), year);
                 tutorYears.setTutorYearsPK(tutorYearsPK);
                 tutorYears.setTutor(savedTutor);
                 tutorYearsList.add(tutorYears);
             }
             tutorYearsRepository.saveAll(tutorYearsList);
+        }
+
+        if (tutorDTO.getTutorAvailabilities() != null){
+            List<TutorsAvailability> tutorsAvailabilityList = new ArrayList<>();
+            for (DayOfWeek day: tutorDTO.getTutorAvailabilities()){
+                TutorsAvailability tutorsAvailability = new TutorsAvailability();
+                TutorsAvailabilityPK tutorsAvailabilityPK = new TutorsAvailabilityPK(savedTutor.getTutorId(), day);
+                tutorsAvailability.setTutorsAvailabilityPK(tutorsAvailabilityPK);
+                tutorsAvailability.setTutor(savedTutor);
+                tutorsAvailabilityList.add(tutorsAvailability);
+            }
+            tutorsAvailabilityRepository.saveAll(tutorsAvailabilityList);
         }
 
         return tutorDTO;
@@ -79,7 +92,8 @@ public class TutorService {
         String postcode = tutorDTO.getPostcode();
         Boolean isQualified = tutorDTO.getIsQualified();
         Boolean isActive = tutorDTO.getIsActive();
-        List<TutorYearsDTO> tutorYears = tutorDTO.getTutorYears();
+        List<Integer> tutorYears = tutorDTO.getTutorYears();
+        List<DayOfWeek> availableDays = tutorDTO.getTutorAvailabilities();
 
         if (firstName != null && !Objects.equals(firstName, existingTutor.getFirstName())){
             existingTutor.setFirstName(firstName);
@@ -107,14 +121,26 @@ public class TutorService {
 
         if (tutorYears != null){
             List<TutorYears> tutorYearsList = new ArrayList<>();
-            for (TutorYearsDTO tutorYearsDTO: tutorYears){
+            for (Integer year: tutorYears){
                 TutorYearsPK tutorYearsPK =
-                        new TutorYearsPK(existingTutor.getTutorId(), tutorYearsDTO.getTutorYear());
+                        new TutorYearsPK(existingTutor.getTutorId(), year);
                 tutorYearsList.add(new TutorYears(tutorYearsPK, existingTutor));
             }
 
             tutorYearsRepository.saveAll(tutorYearsList);
             existingTutor.setTutorYears(tutorYearsRepository.findTutorYearsByTutorId(existingTutor.getTutorId()));
+        }
+
+        if (availableDays != null){
+            List<TutorsAvailability> tutorsAvailabilityList = new ArrayList<>();
+            for (DayOfWeek tutoringDay: availableDays){
+                TutorsAvailabilityPK tutorsAvailabilityPK =
+                        new TutorsAvailabilityPK(existingTutor.getTutorId(), tutoringDay);
+                tutorsAvailabilityList.add(new TutorsAvailability(tutorsAvailabilityPK, existingTutor));
+            }
+            tutorsAvailabilityRepository.saveAll(tutorsAvailabilityList);
+            existingTutor.setTutorsAvailabilities(
+                    tutorsAvailabilityRepository.findTutorsAvailabilityByTutorId(existingTutor.getTutorId()));
         }
 
         existingTutor.setUpdatedAt(LocalDateTime.now());
@@ -132,13 +158,32 @@ public class TutorService {
     }
 
     public List<TutorDTO> filterTutor(String firstName, String surname, String postcode, String phoneNumber,
-                                   Boolean isQualified, Boolean isActive, Integer tutorYear) {
+                                   Boolean isQualified, Boolean isActive,
+                                      List<Integer> tutoringYear, List<DayOfWeek> dayOfWeekList) {
         if (firstName == null && surname == null && postcode == null && phoneNumber == null &&
-                isQualified == null && isActive == null && tutorYear == null){
+                isQualified == null && isActive == null && tutoringYear == null && dayOfWeekList == null){
             return getAllTutors();
         } else {
-            return TutorMapper.convertToTutorDTOList(tutorRepository.filterTutors(firstName, surname, postcode, phoneNumber,
-                    isQualified, isActive, tutorYear));
+            // TODO - Optimize the algorithm.
+            int noOfTutoringYear = 0;
+            if (tutoringYear != null) {
+                noOfTutoringYear = tutoringYear.size();
+            }
+            int noOfDaysOfTutoring = 0;
+            if (dayOfWeekList != null) {
+                noOfDaysOfTutoring = dayOfWeekList.size();
+            }
+
+            if (tutoringYear != null && dayOfWeekList != null){
+                return TutorMapper.convertToTutorDTOList(tutorRepository.filterTutors(firstName, surname, postcode, phoneNumber,
+                        isQualified, isActive, tutoringYear, noOfTutoringYear, dayOfWeekList, noOfDaysOfTutoring));
+            } else if (tutoringYear != null){
+                return TutorMapper.convertToTutorDTOList(tutorRepository.filterTutorsWhenDayOfWeekIsNull(firstName, surname, postcode, phoneNumber,
+                        isQualified, isActive, tutoringYear, noOfTutoringYear));
+            } else {
+                return TutorMapper.convertToTutorDTOList(tutorRepository.filterTutorsWhenTutoringYearIsNull(firstName, surname, postcode, phoneNumber,
+                        isQualified, isActive, dayOfWeekList, noOfDaysOfTutoring));
+            }
         }
     }
 }

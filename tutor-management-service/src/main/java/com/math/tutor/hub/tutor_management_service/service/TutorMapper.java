@@ -1,9 +1,10 @@
 package com.math.tutor.hub.tutor_management_service.service;
 
 import com.math.tutor.hub.tutor_management_service.dto.TutorDTO;
-import com.math.tutor.hub.tutor_management_service.dto.TutorYearsDTO;
+import com.math.tutor.hub.tutor_management_service.enums.DayOfWeek;
 import com.math.tutor.hub.tutor_management_service.model.Tutor;
 import com.math.tutor.hub.tutor_management_service.model.TutorYears;
+import com.math.tutor.hub.tutor_management_service.model.TutorsAvailability;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +21,8 @@ public class TutorMapper {
         tutorDTO.setPostcode(tutor.getPostcode());
         tutorDTO.setIsQualified(tutor.getIsQualified());
         tutorDTO.setIsActive(tutor.getIsActive());
-        tutorDTO.setTutorYears(convertToTutorYearsDTOList(tutor.getTutorYears()));
+        tutorDTO.setTutorYears(convertToTutorYearsList(tutor.getTutorYears()));
+        tutorDTO.setTutorAvailabilities(convertToDayOfWeekList(tutor.getTutorsAvailabilities()));
 
         return tutorDTO;
     }
@@ -33,14 +35,21 @@ public class TutorMapper {
         return tutorDTOList;
     }
 
-    public static List<TutorYearsDTO> convertToTutorYearsDTOList(List<TutorYears> tutorYearsList){
-        List<TutorYearsDTO> tutorYearsDTOList = new ArrayList<>();
+    public static List<Integer> convertToTutorYearsList(List<TutorYears> tutorYearsList){
+        List<Integer> tutorYearIntegerList = new ArrayList<>();
         for (TutorYears tutorYears: tutorYearsList){
-            TutorYearsDTO tutorYearsDTO = new TutorYearsDTO();
-            tutorYearsDTO.setTutorYear(tutorYears.getTutorYearsPK().getTutoringYear());
-            tutorYearsDTOList.add(tutorYearsDTO);
+            tutorYearIntegerList.add(tutorYears.getTutorYearsPK().getTutoringYear());
         }
-        return tutorYearsDTOList;
+        return tutorYearIntegerList;
+    }
+
+    public static List<DayOfWeek> convertToDayOfWeekList
+            (List<TutorsAvailability> tutorsAvailabilities){
+        List<DayOfWeek> daysOfWeekList = new ArrayList<>();
+        for (TutorsAvailability tutorAvailability: tutorsAvailabilities){
+            daysOfWeekList.add(tutorAvailability.getTutorsAvailabilityPK().getDayOfWeek());
+        }
+        return daysOfWeekList;
     }
 
     public static Tutor convertToTutor(TutorDTO tutorDTO){

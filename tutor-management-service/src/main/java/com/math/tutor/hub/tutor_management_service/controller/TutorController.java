@@ -1,9 +1,8 @@
 package com.math.tutor.hub.tutor_management_service.controller;
 
 import com.math.tutor.hub.tutor_management_service.dto.TutorDTO;
-import com.math.tutor.hub.tutor_management_service.model.Tutor;
+import com.math.tutor.hub.tutor_management_service.enums.DayOfWeek;
 import com.math.tutor.hub.tutor_management_service.service.TutorService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -66,10 +65,14 @@ public class TutorController {
             @RequestParam(required = false) String phoneNumber,
             @RequestParam(required = false) Boolean isQualified,
             @RequestParam(required = false) Boolean isActive,
-            @RequestParam(required = false) Integer tutorYear
+            @RequestParam(required = false) List<Integer> tutorYear,
+            @RequestParam(required = false) List<DayOfWeek> dayOfWeek
             ){
         List<TutorDTO> filteredTutorDTOList = tutorService.filterTutor(firstName, surname, postcode, phoneNumber,
-                isQualified, isActive, tutorYear);
+                isQualified, isActive, tutorYear, dayOfWeek);
         return new ResponseEntity<>(filteredTutorDTOList, HttpStatus.OK);
     }
+
+    // TODO - Update the tutor years. eg:- Delete the tutor year for a specific tutor
+    // TODO - Update the available days of the week of a tutor. eg:- Delete the available days of the week of a tutor.
 }

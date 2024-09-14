@@ -1,5 +1,6 @@
 package com.math.tutor.hub.tutor_management_service.dto;
 
+import com.math.tutor.hub.tutor_management_service.enums.DayOfWeek;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
@@ -24,5 +25,6 @@ public class TutorDTO {
     private String postcode;
     private Boolean isQualified = false;
     private Boolean isActive = true;
-    private List<TutorYearsDTO> tutorYears;
+    private List<Integer> tutorYears;
+    private List<DayOfWeek> tutorAvailabilities;
 }

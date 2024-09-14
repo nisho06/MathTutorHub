@@ -47,5 +47,6 @@ public class Tutor {
     // Mapped By - tutor property (the field on TutorYears) on the TutorYears is the owner of the relationship.
     @OneToMany(mappedBy = "tutor", fetch = FetchType.EAGER)
     private List<TutorYears> tutorYears ;
-
+    @OneToMany(mappedBy = "tutor", fetch = FetchType.EAGER)
+    private List<TutorsAvailability> tutorsAvailabilities;
 }
