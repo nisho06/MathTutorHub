@@ -1,7 +1,7 @@
 package com.math.tutor.hub.year_and_topic_management.service;
 
 import com.math.tutor.hub.year_and_topic_management.dto.TopicResponseDTO;
-import com.math.tutor.hub.year_and_topic_management.dto.TopicsForStudentYear;
+import com.math.tutor.hub.year_and_topic_management.dto.TopicsForStudentYearDTO;
 import com.math.tutor.hub.year_and_topic_management.exception.StudentYearNotFoundException;
 import com.math.tutor.hub.year_and_topic_management.exception.TopicNotFoundException;
 import com.math.tutor.hub.year_and_topic_management.mapper.TopicMapper;
@@ -36,13 +36,18 @@ public class TopicService {
     public TopicResponseDTO getTopicForId(int topicId) {
         Topic topic = topicRepository.findByTopicId(topicId).orElseThrow(() ->
                 new TopicNotFoundException("Topic not found for the topic id:- " + topicId));
-        return TopicMapper.convertToTopicResponse(topic);
+        return TopicMapper.convertToTopicResponseDTO(topic);
     }
 
-    public TopicsForStudentYear getAllTopicsForStudentYear(int studentYearLabel) {
+    public TopicsForStudentYearDTO getAllTopicsForStudentYear(int studentYearLabel) {
         StudentYear studentYear = studentYearRepository.findByYearLabel(studentYearLabel)
                 .orElseThrow(() -> new StudentYearNotFoundException("Student year:- " + studentYearLabel + " not found."));
         return TopicMapper.convertToTopicsForStudentYearDTO(studentYear);
     }
 
+    public TopicResponseDTO registerTopic(String topic) {
+        Topic topicObject = new Topic();
+        topicObject.setTopic(topic);
+        return TopicMapper.convertToTopicResponseDTO(topicRepository.save(topicObject));
+    }
 }

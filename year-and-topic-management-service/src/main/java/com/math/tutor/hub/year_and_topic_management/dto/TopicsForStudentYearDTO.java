@@ -9,7 +9,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class TopicsForStudentYear {
+public class TopicsForStudentYearDTO {
     private int yearId;
     private int year;
     private List<String> topics;

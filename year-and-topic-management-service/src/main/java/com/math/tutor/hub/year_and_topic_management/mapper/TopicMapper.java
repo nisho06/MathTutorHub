@@ -2,7 +2,7 @@ package com.math.tutor.hub.year_and_topic_management.mapper;
 
 import com.math.tutor.hub.year_and_topic_management.dto.TopicRequestDTO;
 import com.math.tutor.hub.year_and_topic_management.dto.TopicResponseDTO;
-import com.math.tutor.hub.year_and_topic_management.dto.TopicsForStudentYear;
+import com.math.tutor.hub.year_and_topic_management.dto.TopicsForStudentYearDTO;
 import com.math.tutor.hub.year_and_topic_management.model.StudentYear;
 import com.math.tutor.hub.year_and_topic_management.model.Topic;
 import com.math.tutor.hub.year_and_topic_management.model.YearTopic;
@@ -18,7 +18,7 @@ public class TopicMapper {
         return topic;
     }
 
-    public static TopicResponseDTO convertToTopicResponse(Topic topic){
+    public static TopicResponseDTO convertToTopicResponseDTO(Topic topic){
         TopicResponseDTO topicResponseDTO = new TopicResponseDTO();
         topicResponseDTO.setTopicId(topic.getTopicId());
         topicResponseDTO.setTopic(topic.getTopic());
@@ -28,13 +28,13 @@ public class TopicMapper {
     public static List<TopicResponseDTO> convertToTopicResponseDTOList(List<Topic> topicList){
         List<TopicResponseDTO> topicResponseDTOList = new ArrayList<>();
         for(Topic topic: topicList){
-            topicResponseDTOList.add(convertToTopicResponse(topic));
+            topicResponseDTOList.add(convertToTopicResponseDTO(topic));
         }
         return topicResponseDTOList;
     }
 
-    public static TopicsForStudentYear convertToTopicsForStudentYearDTO(StudentYear studentYear){
-        TopicsForStudentYear topicsForStudentYear = new TopicsForStudentYear();
+    public static TopicsForStudentYearDTO convertToTopicsForStudentYearDTO(StudentYear studentYear){
+        TopicsForStudentYearDTO topicsForStudentYearDTO = new TopicsForStudentYearDTO();
         List<String> topicList = new ArrayList<>();
 
         List<YearTopic> yearTopicList = studentYear.getYearTopicSet();
@@ -42,10 +42,10 @@ public class TopicMapper {
             topicList.add(yearTopic.getTopic().getTopic());
         }
 
-        topicsForStudentYear.setYearId(studentYear.getYearId());
-        topicsForStudentYear.setYear(studentYear.getYearLabel());
-        topicsForStudentYear.setTopics(topicList);
+        topicsForStudentYearDTO.setYearId(studentYear.getYearId());
+        topicsForStudentYearDTO.setYear(studentYear.getYearLabel());
+        topicsForStudentYearDTO.setTopics(topicList);
 
-        return topicsForStudentYear;
+        return topicsForStudentYearDTO;
     }
 }

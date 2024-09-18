@@ -1,9 +1,11 @@
 package com.math.tutor.hub.year_and_topic_management.controller;
 
 import com.math.tutor.hub.year_and_topic_management.dto.TopicResponseDTO;
-import com.math.tutor.hub.year_and_topic_management.dto.TopicsForStudentYear;
+import com.math.tutor.hub.year_and_topic_management.dto.TopicsForStudentYearDTO;
 import com.math.tutor.hub.year_and_topic_management.service.TopicService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,12 +27,20 @@ public class TopicController {
     }
 
     @GetMapping(path = "/{topicId}")
-    public TopicResponseDTO getTopicForId(@PathVariable int topicId){
-        return topicService.getTopicForId(topicId);
+    public ResponseEntity<?> getTopicForId(@PathVariable int topicId){
+        TopicResponseDTO topicResponseDTO = topicService.getTopicForId(topicId);
+        return new ResponseEntity<>(topicResponseDTO, HttpStatus.OK);
     }
 
     @GetMapping("/search")
-    public TopicsForStudentYear getAllTopicsForStudentYear(@RequestParam int studentYear){
-        return topicService.getAllTopicsForStudentYear(studentYear);
+    public ResponseEntity<?> getAllTopicsForStudentYear(@RequestParam int studentYear){
+        TopicsForStudentYearDTO topicsForStudentYearDTO = topicService.getAllTopicsForStudentYear(studentYear);
+        return new ResponseEntity<>(topicsForStudentYearDTO, HttpStatus.OK);
+    }
+
+    @PostMapping()
+    public ResponseEntity<?> registerTopic(@RequestParam String topic){
+        TopicResponseDTO topicResponseDTO = topicService.registerTopic(topic);
+        return new ResponseEntity<>(topicResponseDTO, HttpStatus.OK);
     }
 }
