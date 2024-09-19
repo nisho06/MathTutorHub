@@ -1,6 +1,6 @@
 package com.math.tutor.hub.tutoring_request_service.controller;
 
-import com.math.tutor.hub.tutoring_request_service.model.TutoringRequest;
+import com.math.tutor.hub.tutoring_request_service.dto.TutoringRequestResponseDTO;
 import com.math.tutor.hub.tutoring_request_service.service.TutoringRequestService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,7 +23,8 @@ public class TutoringRequestController {
 
     @GetMapping(path = "/{requestId}")
     public ResponseEntity<?> getTutoringRequestForId(@PathVariable int requestId){
-        TutoringRequest tutoringRequest = tutoringRequestService.getTutoringRequestForId(requestId);
-        return new ResponseEntity<>(tutoringRequest, HttpStatus.OK);
+        TutoringRequestResponseDTO tutoringRequestResponseDTO =
+                tutoringRequestService.getTutoringRequestForId(requestId);
+        return new ResponseEntity<>(tutoringRequestResponseDTO, HttpStatus.OK);
     }
 }

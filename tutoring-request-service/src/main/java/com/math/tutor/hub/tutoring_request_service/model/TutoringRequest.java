@@ -1,5 +1,6 @@
 package com.math.tutor.hub.tutoring_request_service.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.math.tutor.hub.tutoring_request_service.enums.ModeOfTeaching;
 import com.math.tutor.hub.tutoring_request_service.enums.Status;
 import jakarta.persistence.*;
@@ -19,7 +20,7 @@ public class TutoringRequest {
     @Column(name = "student_name")
     private String studentName;
     @Column(name = "student_year_id")
-    private int StudentYearId;
+    private int studentYearId;
     @Column(name = "user_id")
     private int userId;
     @Column(name = "parent_mobile")
@@ -34,4 +35,7 @@ public class TutoringRequest {
     private Status status;
     @Column(name = "additionalNotes")
     private String additionalNotes;
+    @OneToMany(mappedBy = "tutoringRequest", fetch = FetchType.LAZY)
+    @JsonBackReference
+    private List<RequestTopic> requestTopics;
 }
