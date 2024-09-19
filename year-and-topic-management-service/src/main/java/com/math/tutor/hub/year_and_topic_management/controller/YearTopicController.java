@@ -7,7 +7,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 @RequestMapping(path = "api/v1/year-topic")
@@ -20,10 +23,10 @@ public class YearTopicController {
         this.yearTopicService = yearTopicService;
     }
 
-    @RequestMapping(path = "/{yearTopicId}")
-    public ResponseEntity<?> getYearTopicDetailsFromId(@PathVariable int yearTopicId){
-        YearTopicDTO yearTopicDTO = yearTopicService.getYearTopicDetailsFromId(yearTopicId);
-        return new ResponseEntity<>(yearTopicDTO, HttpStatus.OK);
+    @RequestMapping()
+    public ResponseEntity<?> getYearTopicDetailsFromId(@RequestParam List<Integer> id){
+        List<YearTopicDTO> yearTopicDTOList = yearTopicService.getYearTopicDetailsFromId(id);
+        return new ResponseEntity<>(yearTopicDTOList, HttpStatus.OK);
     }
 
 }
